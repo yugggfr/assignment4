@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure Connect & Communication Platform | Lab 4</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="logo-badge">🛡️</div>
+        <div>
+          <h1>Secure Connect & Communication Platform</h1>
+          <p class="subtitle">Lab 4: Authentication, RBAC, Protected Notes & Socket.IO Real-Time Chat</p>
+        </div>
+      </div>
+      <div class="header-auth-status" id="headerAuthStatus">
+        <span class="status-indicator offline"></span>
+        <span id="authStatusText">Not Authenticated</span>
+        <button id="logoutBtn" class="btn btn-secondary btn-sm" style="display:none;">Log Out</button>
+      </div>
+    </header>
+
+    <!-- Main Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-tab="auth">🔐 1. Authentication & JWT</button>
+      <button class="nav-tab" data-tab="notes">📝 2. Secure Notes API</button>
+      <button class="nav-tab" data-tab="chat">💬 3. Socket.IO Real-Time Chat</button>
+      <button class="nav-tab" data-tab="rbac">🛡️ 4. RBAC & Protected Routes</button>
+      <button class="nav-tab" data-tab="events">⚡ 5. EventEmitter Audit Log</button>
+    </nav>
+
+    <!-- Content Sections -->
+    <main class="tab-content">
+      <!-- TAB 1: Authentication -->
+      <section id="tab-auth" class="tab-pane active">
+        <div class="grid grid-2">
+          <!-- Signup Card -->
+          <div class="card">
+            <div class="card-header">
+              <h2>User Registration (Signup)</h2>
+              <span class="badge badge-info">bcrypt password hashing</span>
+            </div>
+            <form id="signupForm" class="form">
+              <div class="form-group">
+                <label for="signupUsername">Username</label>
+                <input type="text" id="signupUsername" placeholder="e.g. alex_developer" required>
+              </div>
+              <div class="form-group">
+                <label for="signupEmail">Email Address</label>
+                <input type="email" id="signupEmail" placeholder="alex@example.com" required>
+              </div>
+              <div class="form-group">
+                <label for="signupPassword">Password (min 6 chars)</label>
+                <input type="password" id="signupPassword" placeholder="••••••••" required>
+              </div>
+              <div class="form-group">
+                <label for="signupRole">User Role (RBAC)</label>
+                <select id="signupRole">
+                  <option value="user" selected>User (Standard Access)</option>
+                  <option value="admin">Admin (Full Administrative Access)</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary">Sign Up & Hash Password</button>
+            </form>
+          </div>
+
+          <!-- Login Card -->
+          <div class="card">
+            <div class="card-header">
+              <h2>User Login</h2>
+              <span class="badge badge-success">JWT Generation</span>
+            </div>
+            <form id="loginForm" class="form">
+              <div class="form-group">
+                <label for="loginEmail">Email Address</label>
+                <input type="email" id="loginEmail" placeholder="alex@example.com" required>
+              </div>
+              <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" placeholder="••••••••" required>
+              </div>
+              <button type="submit" class="btn btn-success">Authenticate & Generate JWT</button>
+            </form>
+
+            <div class="mt-4">
+              <label>Quick Credentials Fill:</label>
+              <div class="button-row">
+                <button type="button" class="btn btn-sm btn-outline" id="fillAdmin">Fill Admin Demo</button>
+                <button type="button" class="btn btn-sm btn-outline" id="fillUser">Fill User Demo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- JWT Token Display -->
+        <div class="card mt-4">
+          <div class="card-header">
+            <h3>Active JWT Session Token</h3>
+            <div>
+              <button class="btn btn-sm btn-secondary" id="copyTokenBtn">Copy Token</button>
+              <button class="btn btn-sm btn-danger" id="clearTokenBtn">Clear Token (Test 401)</button>
+            </div>
+          </div>
+          <div class="token-container">
+            <code id="jwtTokenDisplay">No active JWT token. Please sign up or log in.</code>
+          </div>
+          <div id="decodedPayload" class="decoded-payload mt-2"></div>
+        </div>
+      </section>
+
+      <!-- TAB 2: Notes API -->
+      <section id="tab-notes" class="tab-pane">
+        <div class="grid grid-3-col">
+          <!-- Create Note Form -->
+          <div class="card">
+            <div class="card-header">
+              <h2>Create New Note</h2>
+              <span class="badge badge-warning">Protected Route</span>
+            </div>
+            <form id="createNoteForm" class="form">
+              <div class="form-group">
+                <label for="noteTitle">Note Title</label>
+                <input type="text" id="noteTitle" placeholder="e.g. Unit 4 Security Notes" required>
+              </div>
+              <div class="form-group">
+                <label for="noteContent">Content</label>
+                <textarea id="noteContent" rows="4" placeholder="Store confidential notes securely..." required></textarea>
+              </div>
+              <div class="form-group">
+                <label for="noteTags">Tags (comma separated)</label>
+                <input type="text" id="noteTags" placeholder="security, jwt, webdev">
+              </div>
+              <button type="submit" class="btn btn-primary">Save Note (POST /api/notes)</button>
+            </form>
+          </div>
+
+          <!-- Notes List View -->
+          <div class="card col-span-2">
+            <div class="card-header">
+              <h2>Your Personal Notes (CRUD)</h2>
+              <div>
+                <button class="btn btn-sm btn-secondary" id="refreshNotesBtn">🔄 Refresh Notes</button>
+                <button class="btn btn-sm btn-outline" id="testUnauthenticatedNotes">🚨 Test Access Without Token (401)</button>
+              </div>
+            </div>
+            <div id="notesContainer" class="notes-grid">
+              <p class="placeholder-text">Click "Refresh Notes" or log in to view your secured notes.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: Socket.IO Real-Time Chat -->
+      <section id="tab-chat" class="tab-pane">
+        <div class="grid grid-3-col">
+          <!-- Room & User Sidebar -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Chat Rooms</h3>
+            </div>
+            <div class="room-selector">
+              <button class="room-btn active" data-room="general"># general</button>
+              <button class="room-btn" data-room="developers"># developers</button>
+              <button class="room-btn" data-room="security-ops"># security-ops</button>
+            </div>
+
+            <div class="card-header mt-4">
+              <h3>Active Users</h3>
+              <span class="badge badge-success" id="activeCountBadge">0 Online</span>
+            </div>
+            <ul id="activeUsersList" class="active-users-list"></ul>
+          </div>
+
+          <!-- Chat Window -->
+          <div class="card col-span-2 chat-box-card">
+            <div class="card-header">
+              <div>
+                <h2 id="currentRoomHeader">Room: #general</h2>
+                <small id="socketStatusText" class="text-muted">Connecting to Socket.IO...</small>
+              </div>
+              <span class="badge badge-info">Socket.IO Bidirectional</span>
+            </div>
+
+            <!-- Messages Stream -->
+            <div id="chatMessages" class="chat-messages-container"></div>
+
+            <div id="typingIndicator" class="typing-indicator" style="display:none;"></div>
+
+            <!-- Chat Input -->
+            <form id="chatForm" class="chat-input-form">
+              <input type="text" id="chatInput" placeholder="Type a message and press Enter..." autocomplete="off" required>
+              <button type="submit" class="btn btn-primary">Send 🚀</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: RBAC & Protected Routes -->
+      <section id="tab-rbac" class="tab-pane">
+        <div class="card">
+          <div class="card-header">
+            <h2>Role-Based Access Control (RBAC) Verification</h2>
+            <span class="badge badge-primary">Admin vs User</span>
+          </div>
+          <p class="text-secondary">Demonstrates how the backend validates user roles through JWT claims and enforces access restrictions.</p>
+
+          <div class="rbac-actions mt-3">
+            <button class="btn btn-primary" id="testUserProfileBtn">👤 GET /api/protected/profile (Any Authenticated User)</button>
+            <button class="btn btn-danger" id="testAdminDashboardBtn">👑 GET /api/protected/admin-dashboard (Admin Only)</button>
+            <button class="btn btn-secondary" id="testHealthBtn">🩺 GET /api/health (Public)</button>
+          </div>
+
+          <div class="mt-4">
+            <label>Server Response & Status Code:</label>
+            <pre id="rbacResponseDisplay" class="terminal-display">Click any endpoint button above to test access control...</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: EventEmitter Audit Log -->
+      <section id="tab-events" class="tab-pane">
+        <div class="card">
+          <div class="card-header">
+            <h2>Node.js EventEmitter Real-Time Event Audit Log</h2>
+            <div>
+              <button class="btn btn-sm btn-secondary" id="refreshEventsBtn">🔄 Refresh Event Log</button>
+            </div>
+          </div>
+          <p class="text-secondary">Every signup, login, note modification, security failure, and chat message triggers internal Node.js <code>EventEmitter</code> events on the server.</p>
+
+          <div id="eventsLogContainer" class="events-log-container mt-3">
+            <p class="placeholder-text">Loading server events...</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Alert / Toast Notification -->
+    <div id="toastNotification" class="toast"></div>
+  </div>
+
+  <!-- Socket.IO Client Library -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

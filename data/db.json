@@ -1,0 +1,39 @@
+{
+  "users": [
+    {
+      "id": "mwssx0yelm7f74",
+      "_id": "mwssx0yelm7f74",
+      "username": "student_25437",
+      "email": "student_25437@university.edu",
+      "password": "$2a$10$cc.koU54XU8Di5QjdBASEOlEP7Unl4yKpG3t5Ej.kQNKTCKvZYlN6",
+      "role": "user",
+      "createdAt": "2026-11-23T05:04:27.926Z"
+    },
+    {
+      "id": "mwssx11akyvrxk",
+      "_id": "mwssx11akyvrxk",
+      "username": "admin_25437",
+      "email": "admin_25437@university.edu",
+      "password": "$2a$10$MWdJErk0XfnTgWDfVA9F4OA3LvfRkvsGV3esrQ51Z3uPYdhj2SKjy",
+      "role": "admin",
+      "createdAt": "2026-11-23T05:04:28.030Z"
+    }
+  ],
+  "notes": [
+    {
+      "id": "note_mwssx1a8x5ouu6",
+      "_id": "note_mwssx1a8x5ouu6",
+      "title": "Unit 4 Backend Security Notes (Updated)",
+      "content": "Updated content: Added EventEmitter audit trails and Socket.IO real-time channels.",
+      "tags": [
+        "security",
+        "jwt",
+        "bcrypt",
+        "lab4"
+      ],
+      "userId": "mwssx0yelm7f74",
+      "createdAt": "2026-11-23T05:04:28.352Z",
+      "updatedAt": "2026-11-23T05:04:28.364Z"
+    }
+  ]
+}
